@@ -1,0 +1,17 @@
+---
+- name: Generates the ssh key
+  hosts: monitoring
+
+  tasks:
+   - name: Switch to cmk user
+     shell:
+      su cmk
+
+   - name: Creates the ssh key
+     openssh_keypair:
+      path: "~/.ssh/monitoring_key"
+      type: rsa
+      size: 4096
+      state: present
+      force: no
+

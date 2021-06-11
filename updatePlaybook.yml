@@ -1,0 +1,63 @@
+---
+- name: System update and requirements for the project
+  hosts: localhost
+
+  tasks:
+   - name: Install updates
+     yum:
+      name: update
+      state: latest
+     ignore_errors: true
+     # to do
+
+   - name: Install yum-utils
+     yum: 
+      name: yum-utils
+      state: latest 
+     when: yum.yum-utils.state != "latest"
+
+   - name: Install epel
+     yum:
+      name: epel-release.noarch
+      state: latest
+
+   - name: Turn off selinux
+     ansible.posix.selinux:
+      state: disabled
+     when: state == "enabled"
+     ignore_errors: true
+
+   - name: Turn off firewall
+     ansible.posix.firewalld:
+      state: disabled
+     when: state == "enabled"
+
+   - name: Install Docker
+     yum:
+      name: docker
+      state: latest
+
+   - name: Install pip
+     yum: 
+      name:
+      - python3-pip.noarch
+      state: latest
+
+   - name: Install docker-py
+     pip: 
+      name: docker-py
+
+   - name: Install docker-compose
+     yum:
+      name: podman-compose.noarch
+
+   - name: Install git
+     yum:
+      name: git
+      state: latest
+
+   - name: Clone repo
+     shell:
+      git clone https://github.com/helgabuchhausel/RPi-project /home/teddy/Desktop/repo
+     ignore_errors: true
+     # to do 

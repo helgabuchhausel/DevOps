@@ -1,0 +1,14 @@
+---
+- name: Transfer SSH key
+  hosts: localhost
+
+  - name: From Monitoring to host
+    shell:
+     docker cp monitoring:/omd/sites/cmk/.ssh/id_rsa /home/teddy/Desktop
+     
+  - name: From host to test and dev environment
+    shell:
+     docker cp /home/teddy/Desktop/id_rsa {{ item }}:/root/.ssh/authorized_keys
+    loop:
+     - test_env
+     - dev_env
