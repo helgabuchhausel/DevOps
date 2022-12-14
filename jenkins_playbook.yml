@@ -1,0 +1,54 @@
+---
+
+- hosts: all
+  become: true
+  vars:
+    docker_network: docker_network
+    image_name: jenkins/jenkins:lts
+
+
+  tasks:
+
+  - name: pull jenkins image
+    docker: 
+      name: "{{image_name}}"
+      source: pull
+
+  - name: create a jenkins container
+    docker_container: 
+      name: my_jenkins
+      image: "{{image_name}}"
+      ports: 
+        - 8080:8080
+        - 50000:50000      
+      networks: 
+        - name: "{{docker_network}}"
+      state: present
+
+  - name: start jenkins
+    shell: docker start my_jenkins
+
+  - name: get initial password and change it
+    shell: cat /var/jenkins_home/secrets/initialAdminPassword
+
+  - name: add a job to jenkins
+    jenkins_job: 
+      name: cloud_api
+      url: http://localhost:8080
+      user: admin 
+      password: buchhausel
+
+  - name: install plugins
+    jenkins_plugin: 
+      name: 
+        - msbuild
+        - mailer
+        - github
+ 
+ 
+  - name: register jenkins job info
+    jenkins_job_info:
+      name: cloud_api
+      user: admin
+      password: buchhausel
+    register: my_jenkins_job_info

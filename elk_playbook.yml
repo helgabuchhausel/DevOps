@@ -1,0 +1,31 @@
+---
+
+- hosts: all
+  become: true
+  vars:
+    docker_network: docker_network
+    image_name: sebp/elk
+
+
+  tasks:
+
+  - name: pull  image
+    docker: 
+      name: "{{image_name}}"
+      source: pull
+
+  - name: create a jenkins container
+    docker_container: 
+      name: my_elk
+      image: "{{image_name}}"
+      ports: 
+        - 5601:5601
+        - 9200:9200
+        - 5044:5044
+      networks: 
+        - name: "{{docker_network}}"
+      state: present
+
+  - name: start elk
+    shell: docker start my_elk
+

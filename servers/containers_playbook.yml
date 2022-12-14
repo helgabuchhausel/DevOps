@@ -1,0 +1,39 @@
+---
+
+- hosts: all
+  become: true
+  vars:
+    docker_network: docker_network
+    image_name: centos
+    default_container_name: test 
+    container_count: 2
+
+  tasks:
+
+  - name: build image
+    shell: docker build --rm -t "{{image_name}}" . 
+
+  - name: create 2 containers for the deployment and test enviroment
+    docker_container: 
+      name: "{{default_container_name}}_{{item}}"
+      image: "{{image_name}}"
+      ports: 
+        - 80{{item}}:80
+      networks: 
+        - name: "{{docker_network}}"
+      state: present
+    with_sequence: count="{{container_count}}"
+
+  - name: start the 2 containers 
+    shell: docker start "{{default_container_name}}_{{item}}"
+    with_sequence: count="{{container_count}}"
+
+
+
+
+
+  
+
+
+
+

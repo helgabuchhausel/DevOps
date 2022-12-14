@@ -1,0 +1,47 @@
+---
+
+- hosts: all
+  become: true
+  vars:
+    docker_network: docker_network
+    image: checkmk/check-mk-raw:1.5.0-latest
+    image_name: monitoring_c
+    container_count: 2
+
+
+  tasks:
+
+  - name: pull  image
+    docker: 
+      name: "{{image}}"
+      source: pull
+
+  - name: create a monitoring container
+    docker_container: 
+      name: my_mon
+      image: "{{image_name}}"
+      env: 
+        - CMK_PASSWORD = "buchhausel"
+      ports: 
+        - 80:5000
+      ulimits: nofile:1024
+      tmpfs:
+       - /omd/sites/cmk/tmp 
+      restart: yes 
+      networks: 
+        - name: "{{docker_network}}"
+      state: present
+
+  - name: start monitoring container
+    shell: docker start "{{image_name}}"
+
+  - name: ssh keygen
+    shell: docker exec -it "{{image_name}}" bash -c 'su cmk; ssh-keygen; cat .ssh/id_rsa.pub; '
+    with_sequence: count="{{container_count}}"
+ 
+   #connection
+
+
+
+
+
